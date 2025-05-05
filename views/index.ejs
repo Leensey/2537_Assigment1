@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Home</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+
+<body>
+    <h1>Home</h1>
+    <% if (name) { %>
+        <p>Hello, <%= name %>!</p>
+        <a href="/members">Members</a> | <a href="/logout">Logout</a>
+        <% } else { %>
+            <a href="/signup">Sign Up</a> | <a href="/login">Log In</a>
+            <% } %>
+</body>
+
+</html>

@@ -112,8 +112,13 @@ app.post("/login", async (req, res) => {
 
     const user = await User.findOne({ email: req.body.email });
 
-    if (!user || !(await bcrypt.compare(req.body.password, user.password))) {
-        return res.send("Incorrect email or password.<br><a href='/login'>Try Again</a>");
+    if (!user) {
+        return res.send("Email not found.<br><a href='/login'>Try Again</a>");
+    }
+
+    const passwordMatch = await bcrypt.compare(req.body.password, user.password);
+    if (!passwordMatch) {
+        return res.send("Invalid password.<br><a href='/login'>Try Again</a>");
     }
 
     req.session.authenticated = true;

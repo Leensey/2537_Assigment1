@@ -1,6 +1,9 @@
 ## Self-graded Assignment 1 Checklist
 
-### Criteria	
+### Criteria
+
+#### Student Name: Leen Seydoun
+#### Student Set: 1C
 
 [x]  A home page links to signup and login, if not logged in; and links to members and signout, if logged in.
 

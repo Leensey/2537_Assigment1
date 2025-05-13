@@ -1,0 +1,34 @@
+<%- include("templates/header") %>
+
+    <div class="container">
+        <h2 class="mt-4 mb-3">Users</h2>
+
+        <ul class="list-group">
+            <% users.forEach(user=> { %>
+                <li class="list-group-item">
+                    <div
+                        class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2">
+
+                        <!-- User Info -->
+                        <div class="fw-semibold">
+                            <% if (user.email===currentEmail) { %>
+                                You (<%= user.user_type %>)
+                                    <% } else { %>
+                                        <%= user.name %> (<%= user.user_type %>)
+                                                <% } %>
+                        </div>
+
+                        <!-- Admin Actions -->
+                        <% if (user.email !==currentEmail) { %>
+                            <div class="d-flex flex-column flex-sm-row gap-2">
+                                <a href="/promote/<%= user._id %>" class="btn btn-danger">Promote to Admin</a>
+                                <a href="/demote/<%= user._id %>" class="btn btn-success">Demote to User</a>
+                            </div>
+                            <% } %>
+                    </div>
+                </li>
+                <% }) %>
+        </ul>
+    </div>
+
+    <%- include("templates/footer") %>

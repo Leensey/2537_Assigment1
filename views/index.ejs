@@ -1,19 +1,13 @@
-<!DOCTYPE html>
-<html>
+<%- include("templates/header") %>
 
-<head>
-    <title>Home</title>
-    <link rel="stylesheet" href="/styles.css">
-</head>
+    <div class="container text-center mt-5">
+        <% if (name) { %>
+            <h2 class="mb-3">Hello, <%= name %>!</h2>
+            <a href="/members" class="btn btn-outline-dark">Go To Members Area</a>
+            <% } else { %>
+                <h1 class="mb-4">Welcome to the App!</h1>
+                <p class="lead">Please login or sign up to continue.</p>
+                <% } %>
+    </div>
 
-<body>
-    <h1>Home</h1>
-    <% if (name) { %>
-        <p>Hello, <%= name %>!</p>
-        <a href="/members">Members</a> | <a href="/logout">Logout</a>
-        <% } else { %>
-            <a href="/signup">Sign Up</a> | <a href="/login">Log In</a>
-            <% } %>
-</body>
-
-</html>
+    <%- include("templates/footer") %>

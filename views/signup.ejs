@@ -1,19 +1,50 @@
-<!DOCTYPE html>
-<html>
+<%- include("templates/header") %>
 
-<head>
-    <title>Sign Up</title>
-    <link rel="stylesheet" href="/styles.css">
-</head>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <h1 class="mb-4">Sign Up</h1>
 
-<body>
-    <h1>Sign Up</h1>
-    <form method="POST" action="/signup">
-        <input name="name" placeholder="Name" required><br>
-        <input name="email" placeholder="Email" required><br>
-        <input name="password" type="password" placeholder="Password" required><br>
-        <button>Sign Up</button>
-    </form>
-</body>
+                <% if (errorMessage) { %>
+                    <div class="alert alert-danger">
+                        <%= errorMessage %>
+                    </div>
+                    <% } %>
+                        <% if (missingName) { %>
+                            <div class="alert alert-danger">Name is required.</div>
+                            <% } %>
+                                <% if (missingEmail) { %>
+                                    <div class="alert alert-danger">Valid email is required.</div>
+                                    <% } %>
+                                        <% if (missingPassword) { %>
+                                            <div class="alert alert-danger">Password is required.</div>
+                                            <% } %>
 
-</html>
+                                                <form method="POST" action="/signup">
+                                                    <div class="mb-3">
+                                                        <label for="name" class="form-label">Name</label>
+                                                        <input name="name" id="name" class="form-control"
+                                                            placeholder="Name">
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label for="email" class="form-label">Email</label>
+                                                        <input name="email" id="email" type="email" class="form-control"
+                                                            placeholder="Email">
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label for="password" class="form-label">Password</label>
+                                                        <input name="password" id="password" type="password"
+                                                            class="form-control" placeholder="Password">
+                                                    </div>
+                                                    <button type="submit" class="btn btn-primary">Sign Up</button>
+                                                </form>
+
+                                                <% if (errorMessage || missingName || missingEmail || missingPassword) {
+                                                    %>
+                                                    <a href="/signup" class="btn btn-secondary mt-3">Try Again</a>
+                                                    <% } %>
+            </div>
+        </div>
+    </div>
+
+    <%- include("templates/footer") %>

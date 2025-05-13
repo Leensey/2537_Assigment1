@@ -6,6 +6,8 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const Joi = require("joi");
 const User = require("./models/user.model");
+const requireAuth = require("./middleware/requireAuth");
+const requireAdmin = require("./middleware/requireAdmin");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -49,6 +51,12 @@ app.use(session({
     }
 }));
 
+app.use((req, res, next) => {
+    res.locals.name = req.session.name;
+    res.locals.user_type = req.session.user_type;
+    next();
+});
+
 // Home Page
 app.get("/", (req, res) => {
     res.render("index", { name: req.session.name });
@@ -56,20 +64,35 @@ app.get("/", (req, res) => {
 
 // Sign Up Page
 app.get("/signup", (req, res) => {
-    res.render("signup");
+    res.render("signup", {
+        missingName: req.query.name === "true",
+        missingEmail: req.query.email === "true",
+        missingPassword: req.query.password === "true",
+        errorMessage: null
+    });
 });
 
 // Handle Sign Up
 app.post("/signup", async (req, res) => {
+    const { name, email, password } = req.body;
+
     const schema = Joi.object({
         name: Joi.string().required(),
         email: Joi.string().email().required(),
         password: Joi.string().required()
     });
 
-    const validation = schema.validate(req.body);
+    const validation = schema.validate(req.body, { abortEarly: false });
+    // Handle missing or invalid fields
     if (validation.error) {
-        return res.send(`Error: ${validation.error.message}<br><a href="/signup">Try Again</a>`);
+        // Prepare query flags: ?name=true&email=true&password=true
+        const flags = [];
+        validation.error.details.forEach(err => {
+            if (err.path.includes("name")) flags.push("name=true");
+            if (err.path.includes("email")) flags.push("email=true");
+            if (err.path.includes("password")) flags.push("password=true");
+        });
+        return res.redirect("/signup?" + flags.join("&"));
     }
 
     const hashedPassword = await bcrypt.hash(req.body.password, 12);
@@ -78,7 +101,8 @@ app.post("/signup", async (req, res) => {
         const newUser = new User({
             name: req.body.name,
             email: req.body.email,
-            password: hashedPassword
+            password: hashedPassword,
+            user_type: "user"
         });
 
         await newUser.save();
@@ -86,16 +110,25 @@ app.post("/signup", async (req, res) => {
         req.session.authenticated = true;
         req.session.name = newUser.name;
         req.session.email = newUser.email;
+        req.session.user_type = "user";
 
         res.redirect("/members");
     } catch (err) {
-        res.send("Error creating user. Try again.");
+        res.render("signup", {
+            missingName: false,
+            missingEmail: false,
+            missingPassword: false,
+            errorMessage: "Something went wrong. Please try again."
+        });
     }
 });
 
 // Login Page
 app.get("/login", (req, res) => {
-    res.render("login");
+    res.render("login", {
+        errorMessage: null,
+        showSignupLink: false
+    });
 });
 
 // Handle Login
@@ -106,36 +139,75 @@ app.post("/login", async (req, res) => {
     });
 
     const validation = schema.validate(req.body);
+
     if (validation.error) {
-        return res.send("Invalid input.<br><a href='/login'>Try Again</a>");
+        return res.render("login", {
+            errorMessage: "Invalid email or password. Please try again.",
+            showSignupLink: true
+        });
     }
 
     const user = await User.findOne({ email: req.body.email });
 
     if (!user) {
-        return res.send("Email not found.<br><a href='/login'>Try Again</a>");
+        return res.render("login", {
+            errorMessage: "User and password not found.",
+            showSignupLink: true
+        });
     }
 
     const passwordMatch = await bcrypt.compare(req.body.password, user.password);
+
     if (!passwordMatch) {
-        return res.send("Invalid password.<br><a href='/login'>Try Again</a>");
+        return res.render("login", {
+            errorMessage: "Invalid password.",
+            showSignupLink: false
+        });
     }
 
     req.session.authenticated = true;
     req.session.name = user.name;
     req.session.email = user.email;
+    req.session.user_type = user.user_type;
 
     res.redirect("/members");
 });
 
 // Members Area
-app.get("/members", (req, res) => {
-    if (!req.session.authenticated) return res.redirect("/");
-
+app.get("/members", requireAuth, (req, res) => {
     const images = ["1.jpg", "2.jpg", "3.jpg"];
-    const randomImage = images[Math.floor(Math.random() * images.length)];
+    res.render("members", { images });
+});
 
-    res.render("members", { name: req.session.name, image: randomImage });
+// Admin Area
+app.get("/admin", requireAuth, requireAdmin, async (req, res) => {
+    const users = await User.find();
+    res.render("admin", {
+        users,
+        currentEmail: req.session.email
+    });
+});
+
+// Promote User
+app.get("/promote/:id", requireAuth, requireAdmin, async (req, res) => {
+    try {
+        await User.updateOne({ _id: req.params.id }, { $set: { user_type: "admin" } });
+        res.redirect("/admin");
+    } catch (err) {
+        console.error("Promotion error:", err);
+        res.status(500).send("Failed to promote user.");
+    }
+});
+
+// Demote User
+app.get("/demote/:id", requireAuth, requireAdmin, async (req, res) => {
+    try {
+        await User.updateOne({ _id: req.params.id }, { $set: { user_type: "user" } });
+        res.redirect("/admin");
+    } catch (err) {
+        console.error("Demotion error:", err);
+        res.status(500).send("Failed to demote user.");
+    }
 });
 
 // Logout
@@ -150,7 +222,6 @@ app.get("/logout", (req, res) => {
 app.use((req, res) => {
     res.status(404).render("404");
 });
-
 
 // Start Server
 app.listen(PORT, () => {

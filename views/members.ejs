@@ -1,15 +1,19 @@
-<!DOCTYPE html>
-<html>
+<%- include("templates/header") %>
 
-<head>
-    <title>Members Area</title>
-    <link rel="stylesheet" href="/styles.css">
-</head>
-
-<body>
     <h1>Welcome, <%= name %>!</h1>
-    <img src="/images/<%= image %>" alt="Random Member Image"><br>
-    <a href="/logout">Logout</a>
-</body>
 
-</html>
+    <div class="container">
+        <div class="row">
+            <div class="col-12 col-md-4 mb-3">
+                <img src="/images/1.jpg" class="img-fluid" alt="img1">
+            </div>
+            <div class="col-12 col-md-4 mb-3">
+                <img src="/images/2.jpg" class="img-fluid" alt="img2">
+            </div>
+            <div class="col-12 col-md-4 mb-3">
+                <img src="/images/3.jpg" class="img-fluid" alt="img3">
+            </div>
+        </div>
+    </div>
+
+    <%- include("templates/footer") %>

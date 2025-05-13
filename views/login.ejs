@@ -1,18 +1,35 @@
-<!DOCTYPE html>
-<html>
+<%- include("templates/header") %>
 
-<head>
-    <title>Log In</title>
-    <link rel="stylesheet" href="/styles.css">
-</head>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <h1 class="mb-4">Log In</h1>
 
-<body>
-    <h1>Log In</h1>
-    <form method="POST" action="/login">
-        <input name="email" placeholder="Email" required><br>
-        <input name="password" type="password" placeholder="Password" required><br>
-        <button>Log In</button>
-    </form>
-</body>
+                <% if (errorMessage) { %>
+                    <div class="alert alert-danger">
+                        <%= errorMessage %>
+                    </div>
+                    <% } %>
 
-</html>
+                        <form method="POST" action="/login">
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input name="email" id="email" type="email" class="form-control" placeholder="Email"
+                                    required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Password</label>
+                                <input name="password" id="password" type="password" class="form-control"
+                                    placeholder="Password" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Log In</button>
+                        </form>
+
+                        <% if (showSignupLink) { %>
+                            <a href="/signup" class="btn btn-link mt-3">Go to Sign Up</a>
+                            <% } %>
+            </div>
+        </div>
+    </div>
+
+    <%- include("templates/footer") %>

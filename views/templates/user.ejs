@@ -1,0 +1,10 @@
+<li class="list-group-item d-flex justify-content-between">
+    <span>
+        <%= user.name %> - <%= user.email %> - <%= user.user_type %>
+    </span>
+    <% if (user.user_type==='user' ) { %>
+        <a href="/promote/<%= user._id %>">Promote to Admin</a>
+        <% } else { %>
+            <a href="/demote/<%= user._id %>">Demote to User</a>
+            <% } %>
+</li>
